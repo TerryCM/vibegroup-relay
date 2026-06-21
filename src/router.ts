@@ -30,6 +30,10 @@ export function createRouter(deps: RouterDeps): Router {
       if (!env.to || !env.qid) return { error: 'missing_to_or_qid' }
       const asker = deps.presence.get(from)
       if (!asker) return { error: 'unknown_sender' }
+      // Room isolation: a peer may only reach targets inside its own room. Without this,
+      // knowing any peerId is enough to deliver/queue across room boundaries.
+      const target = deps.presence.get(env.to)
+      if (!target || target.room !== asker.room) return { error: 'peer_not_in_room' }
       const opened = deps.asks.open({ qid: env.qid, room: asker.room, from, to: env.to }, deps.now())
       if (opened === 'duplicate') return { error: 'duplicate_qid' }
 
