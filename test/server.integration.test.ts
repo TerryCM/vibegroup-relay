@@ -65,6 +65,38 @@ test('two peers complete a full ask -> answer loop', async () => {
   expect((aliceAnswer.body as { ciphertext: string }).ciphertext).toBe('A')
 })
 
+test('a question can NOT cross room boundaries', async () => {
+  relay = startRelay({ port: 0, secret: 's' })
+  const roomA = await newRoom(relay.port)
+  const roomB = await newRoom(relay.port)
+
+  const alice = connect(relay.port)   // room A
+  const eve = connect(relay.port)     // room B
+  await Promise.all([alice.open, eve.open])
+
+  alice.sendEnv({ kind: 'join', body: { room: roomA.room, token: roomA.token, name: 'alice' } })
+  eve.sendEnv({ kind: 'join', body: { room: roomB.room, token: roomB.token, name: 'eve' } })
+  const aliceId = (await until(alice, 'joined')).from!
+  const eveId = (await until(eve, 'joined')).from!
+  expect(aliceId).not.toBe(eveId)
+
+  // Alice (room A) tries to reach eve's peerId, which lives in room B.
+  const qid = newQid()
+  alice.sendEnv({ kind: 'question', to: eveId, qid, body: { ciphertext: 'c', nonce: 'n' } })
+
+  // The relay must refuse — eve is not in alice's room — and eve must receive nothing.
+  const ack = await until(alice, 'ack')
+  expect(ack.body).toEqual({ outcome: { error: 'peer_not_in_room' } })
+
+  // Drain eve's stream for a beat and assert no question ever crossed (she still gets
+  // presence frames, so we must scan past those rather than peek a single message).
+  const sawQuestion = await Promise.race([
+    (async () => { for (;;) { if ((await eve.next()).kind === 'question') return true } })(),
+    new Promise<boolean>((r) => setTimeout(() => r(false), 60)),
+  ])
+  expect(sawQuestion).toBe(false)
+})
+
 test('a question to an offline peer is queued and drained when it resumes', async () => {
   relay = startRelay({ port: 0, secret: 's' })
   const { room, token } = await newRoom(relay.port)
