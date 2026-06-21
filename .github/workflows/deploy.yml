@@ -40,6 +40,12 @@ jobs:
         with:
           bun-version: latest
 
+      # The protocol is consumed via file:../ and imports zod — install its deps
+      # so the symlinked package resolves at build/test time.
+      - name: Install protocol deps
+        working-directory: vibegroup-protocol
+        run: bun install
+
       - name: Install, test, build bundle
         working-directory: vibegroup-relay
         run: |
