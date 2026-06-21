@@ -1,0 +1,66 @@
+name: Deploy relay to Azure
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  id-token: write   # for Azure OIDC login
+  contents: read
+
+concurrency:
+  group: deploy-relay
+  cancel-in-progress: true
+
+env:
+  ACR: ca2c7b27447bacr
+  IMAGE: vibegroup-relay
+  RESOURCE_GROUP: vibegroup-rg
+  CONTAINERAPP: vibegroup-relay
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout relay
+        uses: actions/checkout@v4
+        with:
+          path: vibegroup-relay
+
+      # @vibegroup/protocol is a file:../ dependency — provide it as a sibling.
+      - name: Checkout protocol
+        uses: actions/checkout@v4
+        with:
+          repository: TerryCM/vibegroup-protocol
+          path: vibegroup-protocol
+
+      - name: Setup Bun
+        uses: oven-sh/setup-bun@v2
+        with:
+          bun-version: latest
+
+      - name: Install, test, build bundle
+        working-directory: vibegroup-relay
+        run: |
+          bun install
+          bun test
+          bun run build
+          test -f dist/relay.js
+
+      - name: Azure login (OIDC)
+        uses: azure/login@v2
+        with:
+          client-id: ${{ secrets.AZURE_CLIENT_ID }}
+          tenant-id: ${{ secrets.AZURE_TENANT_ID }}
+          subscription-id: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
+
+      - name: Build image in ACR and roll the container app
+        working-directory: vibegroup-relay
+        run: |
+          TAG="${GITHUB_SHA::12}"
+          az acr build --registry "$ACR" --image "$IMAGE:$TAG" --image "$IMAGE:latest" .
+          az containerapp update \
+            --name "$CONTAINERAPP" --resource-group "$RESOURCE_GROUP" \
+            --image "$ACR.azurecr.io/$IMAGE:$TAG"
+          echo "Deployed $IMAGE:$TAG → https://relay.vibegroup.sh"
