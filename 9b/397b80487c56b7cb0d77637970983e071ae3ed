@@ -1,0 +1,21 @@
+test/router.test.ts
+  s_e1b8c7a7c37b85::t_2b68a1e4fb9ccf 1-64
+src/router.ts
+  s_e1b8c7a7c37b85::t_a9f53d23b2741d 1-50
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.5.9",
+  "base_commit_sha": "9b397b80487c56b7cb0d77637970983e071ae3ed",
+  "prompts": {},
+  "sessions": {
+    "s_e1b8c7a7c37b85": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "d76dab22-5e3e-4718-958e-d84684eb9e16",
+        "model": "claude-opus-4-8"
+      },
+      "human_author": "Terry Cruz Melo <terry@cruz.pe>"
+    }
+  }
+}
