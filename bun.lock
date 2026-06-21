@@ -1,0 +1,17 @@
+{
+  "lockfileVersion": 1,
+  "configVersion": 1,
+  "workspaces": {
+    "": {
+      "name": "@vibegroup/relay",
+      "dependencies": {
+        "@vibegroup/protocol": "file:../vibegroup-protocol",
+      },
+    },
+  },
+  "packages": {
+    "@vibegroup/protocol": ["@vibegroup/protocol@file:../vibegroup-protocol", { "dependencies": { "zod": "^3.23.8" } }],
+
+    "zod": ["zod@3.25.76", "", {}, "sha512-gzUt/qt81nXsFGKIFcC3YnfEAx5NkunCfnDlvuBSSFS02bcXu4Lmea0AFIUwbLWxWPx3d9p8S5QoaujKcNQxcQ=="],
+  }
+}
