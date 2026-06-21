@@ -5,14 +5,14 @@ The relay is a single self-contained Bun WebSocket server. The simplest hosted p
 ## Live instance (alpha)
 
 ```
-wss://vibegroup-relay.grayriver-52f1583a.eastus.azurecontainerapps.io/ws
+wss://relay.vibegroup.sh/ws
 ```
 
 > Alpha instance on the maintainer's Azure subscription — fine for trying vibegroup, not a stability guarantee. For anything real, deploy your own (below).
 
 ```bash
 # sanity check
-curl https://vibegroup-relay.grayriver-52f1583a.eastus.azurecontainerapps.io/health   # → ok
+curl https://relay.vibegroup.sh/health   # → ok
 ```
 
 ## Deploy your own (Azure Container Apps)
