@@ -2,7 +2,9 @@
   "name": "@vibegroup/relay",
   "version": "0.0.1",
   "type": "module",
-  "main": "src/index.ts",
+  "main": "src/server.ts",
+  "exports": { ".": "./src/server.ts" },
+  "bin": { "vibegroup-relay": "./src/index.ts" },
   "scripts": {
     "start": "bun run src/index.ts",
     "test": "bun test"
